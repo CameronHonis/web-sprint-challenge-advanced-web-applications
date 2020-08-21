@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import useApi from '../hooks/useApi'
+import { axiosWithAuth } from '../axiosBuilds'
 
 const initialColor = {
   color: "",
@@ -7,9 +8,12 @@ const initialColor = {
 };
 
 const ColorList = ({ colors, updateColors }) => {
-  console.log(colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
+  const [colorToDelete, setColorToDelete] = useState()
+
+  const [putApiData, putApiFire] = useApi('put', {colorToEdit: colorToEdit})
+  const [deleteApiData, deleteApiFire] = useApi('delete', {color: colorToDelete})
 
   const editColor = color => {
     setEditing(true);
@@ -18,14 +22,50 @@ const ColorList = ({ colors, updateColors }) => {
 
   const saveEdit = e => {
     e.preventDefault();
-    // Make a put request to save your updated color
-    // think about where will you get the id from...
-    // where is is saved right now?
+    putApiFire()
   };
 
+  useEffect(() => {
+    if (putApiData){
+      updateColors([...colors].map(v => {
+        if (v.id === putApiData.id){
+          return putApiData
+        } else {
+          return v
+        }
+      }))
+      setEditing(false)
+      setColorToEdit(initialColor)
+    }
+  },[putApiData])
+
   const deleteColor = color => {
-    // make a delete request to delete this color
+    setColorToDelete(color)
   };
+
+  useEffect(() => {
+    if (colorToDelete){
+      deleteApiFire()
+      setColorToDelete()
+    }
+  },[colorToDelete])
+
+  useEffect(() => {
+    if (deleteApiData){
+      console.log(deleteApiData)
+      updateColors([...colors].filter(v => {
+        if (v.id === deleteApiData){
+          return null
+        } else {
+          return v
+        }
+      }))
+      if (colorToEdit.id === deleteApiData){
+        setEditing(false)
+        setColorToEdit(initialColor)
+      }
+    }
+  },[deleteApiData])
 
   return (
     <div className="colors-wrap">
