@@ -1,9 +1,9 @@
 import React from "react";
 import { render, screen, getByTestId, waitFor } from "@testing-library/react";
 import BubblePage from "./BubblePage";
-import { useApi as mockUseApi } from '../hooks/useApi'
+import { fetchColors as mockFetchColors } from './fetchColors'
 
-jest.mock('../hooks/useApi.js')
+jest.mock('./fetchColors')
 
 const fakeColors = [
   {
@@ -14,7 +14,7 @@ const fakeColors = [
 ]
 
 test("Fetches data and renders the bubbles", async () => {
-  mockUseApi.mockResolvedValueOnce([fakeColors, () => {}])
+  mockFetchColors.mockResolvedValueOnce(fakeColors)
   localStorage.setItem('token', "ahuBHejkJJiMDhmODZhZi0zaeLTQ4ZfeaseOGZgesai1jZWYgrTA07i73Gebhu98")
   render(<BubblePage />)
   await waitFor(() => getByTestId('bubble'))
